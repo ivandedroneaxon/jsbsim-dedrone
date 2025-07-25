@@ -28,7 +28,7 @@
   <property> ap/altitude_hold     </property>
   <property> ap/heading_hold      </property>
   <property> ap/altitude_setpoint </property>
-  <property> ap/heading_setpoint  </property>
+  <property> guidance/wp-heading-deg </property>
   <property> ap/aileron_cmd       </property>
   <property> ap/elevator_cmd      </property>
   <property> ap/airspeed_setpoint </property>
@@ -97,10 +97,10 @@ ROLL CHANNEL
     <gain>57.3</gain> <!-- convert to degrees -->
   </pure_gain>
 
-  <summer name="fcs/heading-error">
-    <input> -fcs/heading-true-degrees</input>
-    <input> ap/heading_setpoint </input>
-  </summer>
+    <summer name="fcs/heading-error">
+      <input> -fcs/heading-true-degrees</input>
+      <input> guidance/wp-heading-deg </input>
+    </summer>
 
   <switch name="fcs/heading-error-bias-switch">
     <default value="0.0"/>
@@ -313,6 +313,44 @@ PITCH CHANNEL
     <gain> -1.0 </gain>
     <output> ap/elevator_cmd </output>
   </pure_gain>
+</channel>
+
+
+<channel name="Throttle airspeed hold">
+
+    <summer name="fcs/airspeed-error">
+        <input> ap/airspeed_setpoint </input>
+        <input> -velocities/vtrue-fps </input>
+        <clipto>
+            <min>-400.0</min>
+            <max> 400.0</max>
+        </clipto>
+    </summer>
+
+    <switch name="fcs/airspeed-error-switch">
+        <default value="0.0"/>
+        <test value="fcs/airspeed-error">
+            ap/airspeed_hold == 1
+        </test>
+    </switch>
+
+    <pid name="fcs/airspeed-hold-pid">
+        <input> fcs/airspeed-error-switch </input>
+        <kp> 0.3 </kp>
+        <ki> 0.008 </ki>
+        <kd> 0.1 </kd>
+        <clipto>
+            <min> 0.0 </min>
+            <max> 1.0 </max>
+        </clipto>
+    </pid>
+
+    <pure_gain name="fcs/throttle">
+        <input> fcs/airspeed-hold-pid </input>
+        <gain> 1.0 </gain>
+        <output> ap/throttle_cmd </output>
+    </pure_gain>
+
 </channel>
 
 </autopilot>
