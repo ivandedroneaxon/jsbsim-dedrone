@@ -48,6 +48,9 @@
         </location>
     </metrics>
 
+    <system file="GNCUtilities"/>
+    <autopilot file="f15_autopilot"/>
+
     <mass_balance negated_crossproduct_inertia="true">
         <ixx unit="SLUG*FT2"> 28700 </ixx>
         <iyy unit="SLUG*FT2"> 165100 </iyy>

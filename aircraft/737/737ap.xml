@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<autopilot name="B737 Full Autopilot">
+
+  <!-- Roll control via aileron -->
+  <channel name="aileron_cmd">
+    <property>ap/aileron_cmd</property>
+    <switch>
+      <case>
+        <condition>ap/heading-hold eq 1</condition>
+        <summer>
+          <input>ap/heading-setpoint</input>
+          <input>-attitude/psi-deg</input>
+        </summer>
+        <gain>0.5</gain>
+      </case>
+      <default>
+        <property>ap/roll-angle-setpoint</property>
+        <input>-attitude/phi-deg</input>
+        <gain>0.8</gain>
+      </default>
+    </switch>
+    <limiter><min>-1</min><max>1</max></limiter>
+    <filter type="lag"><tau>0.4</tau></filter>
+  </channel>
+
+  <!-- Pitch control via elevator -->
+  <channel name="elevator_cmd">
+    <property>ap/elevator_cmd</property>
+    <switch>
+      <case>
+        <condition>ap/altitude-hold eq 1</condition>
+        <summer>
+          <input>ap/altitude-setpoint</input>
+          <input>-position/h-sl-ft</input>
+        </summer>
+        <pid>
+          <kp>0.001</kp>
+          <ki>0.00005</ki>
+          <kd>0.002</kd>
+        </pid>
+      </case>
+      <default>
+        <summer>
+          <input>ap/theta-angle-setpoint</input>
+          <input>-attitude/theta-deg</input>
+        </summer>
+        <pid>
+          <kp>0.05</kp>
+          <ki>0.005</ki>
+          <kd>0.04</kd>
+        </pid>
+      </default>
+    </switch>
+    <limiter><min>-0.8</min><max>0.8</max></limiter>
+    <filter type="lag"><tau>0.3</tau></filter>
+  </channel>
+
+  <!-- Throttle control for airspeed hold -->
+  <channel name="throttle_cmd">
+    <property>ap/throttle_cmd</property>
+    <switch>
+      <case>
+        <condition>ap/airspeed-hold eq 1</condition>
+        <summer>
+          <input>ap/airspeed-setpoint</input>
+          <input>-velocities/vtrue-fps</input>
+        </summer>
+        <pid>
+          <kp>0.008</kp>
+          <ki>0.001</ki>
+          <kd>0.003</kd>
+        </pid>
+      </case>
+      <default>
+        <input>ap/manual-throttle-cmd</input>
+      </default>
+    </switch>
+    <limiter><min>0.0</min><max>1.0</max></limiter>
+    <filter type="lag"><tau>0.5</tau></filter>
+  </channel>
+
+  <!-- Optional Yaw damper / rudder assist -->
+  <channel name="rudder_cmd">
+    <property>ap/rudder_cmd</property>
+    <input>-velocities/vb-fps</input>
+    <gain>0.01</gain>
+    <limiter><min>-0.3</min><max>0.3</max></limiter>
+    <filter type="lag"><tau>0.5</tau></filter>
+  </channel>
+
+</autopilot>
+

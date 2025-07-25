@@ -68,6 +68,8 @@
         </location>
     </mass_balance>
 
+    <autopilot file="737ap"/>
+
     <ground_reactions>
         <contact name="Nose Gear" type="BOGEY">
             <location unit="IN">
